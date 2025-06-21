@@ -6,21 +6,20 @@ const nodemailer = require('nodemailer');
 const Razorpay = require('razorpay');
 const Booking = require('./models/Booking');
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Optional: prevent deprecation warning related to strictQuery
+// MongoDB Connection
 mongoose.set('strictQuery', true);
-
-// Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Error:', err));
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// Setup nodemailer for Gmail
+// Nodemailer Setup (Gmail SMTP)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -29,13 +28,18 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Booking route
+// Razorpay Setup (Test/Live keys)
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+// Route: Create Booking + Email
 app.post('/api/book', async (req, res) => {
   try {
     const booking = new Booking(req.body);
     await booking.save();
 
-    // Send confirmation email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: booking.email,
@@ -44,29 +48,24 @@ app.post('/api/book', async (req, res) => {
     });
 
     res.status(200).json({ message: 'Booking saved and email sent.' });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error('❌ Booking Error:', error);
     res.status(500).json({ message: 'Booking failed' });
   }
 });
 
-// Fetch all bookings
+// Route: Get All Bookings
 app.get('/api/bookings', async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ date: -1 });
-    res.json(bookings);
-  } catch (err) {
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('❌ Fetch Bookings Error:', error);
     res.status(500).json({ message: 'Error fetching bookings' });
   }
 });
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
-
-// Payment route
+// Route: Initiate Payment
 app.post('/api/payment', async (req, res) => {
   const { amount } = req.body;
 
@@ -74,17 +73,18 @@ app.post('/api/payment', async (req, res) => {
     const order = await razorpay.orders.create({
       amount: amount * 100, // Amount in paise
       currency: 'INR',
-      receipt: `receipt_${Date.now()}`
+      receipt: `receipt_order_${Date.now()}`
     });
 
     res.status(200).json(order);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Payment initiation failed', error: err });
+  } catch (error) {
+    console.error('❌ Payment Error:', error);
+    res.status(500).json({ message: 'Payment initiation failed' });
   }
 });
 
-// Start the server
-app.listen(process.env.PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${process.env.PORT}`);
+// Server Start
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
