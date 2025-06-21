@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DriveNow - Car Rental Service</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+  <!-- Navbar -->
+  <nav class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-blue-600">DriveNow</h1>
+    <ul class="flex space-x-6">
+      <li><a href="#cars" class="hover:text-blue-500">Cars</a></li>
+      <li><a href="#booking" class="hover:text-blue-500">Book Now</a></li>
+      <li><a href="#dashboard" class="hover:text-blue-500">Dashboard</a></li>
+      <li><a href="#contact" class="hover:text-blue-500">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="bg-blue-600 text-white text-center py-20">
+    <h2 class="text-4xl font-bold mb-4">Affordable Car Rentals, Anytime</h2>
+    <p class="text-lg">Choose from a wide range of cars at unbeatable prices.</p>
+  </section>
+
+  <!-- Car Listings -->
+  <section id="cars" class="py-12 px-6">
+    <h3 class="text-3xl font-bold text-center mb-10">Available Cars</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-4 rounded shadow">
+        <img src="https://img.autocarindia.com/ExtraImages/20140114080103_classic.jpg" alt="Sedan" class="w-full h-40 object-cover rounded" />
+        <h4 class="text-xl font-semibold mt-4">Sedan</h4>
+        <p class="text-gray-600">₹1500/day</p>
+      </div>
+      <div class="bg-white p-4 rounded shadow">
+        <img src="https://stimg.cardekho.com/images/carexteriorimages/630x420/Mahindra/Marazzo/7948/1632224129922/front-left-side-47.jpg" alt="SUV" class="w-full h-40 object-cover rounded" />
+        <h4 class="text-xl font-semibold mt-4">SUV</h4>
+        <p class="text-gray-600">₹2200/day</p>
+      </div>
+      <div class="bg-white p-4 rounded shadow">
+        <img src="https://png.pngtree.com/png-vector/20220729/ourmid/pngtree-light-blue-luxury-car-transparent-png-png-image_6090077.png" alt="Luxury" class="w-full h-40 object-cover rounded" />
+        <h4 class="text-xl font-semibold mt-4">Luxury</h4>
+        <p class="text-gray-600">₹4500/day</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking Form -->
+  <section id="booking" class="bg-white py-12 px-6">
+    <h3 class="text-3xl font-bold text-center mb-10">Book Your Ride</h3>
+    <form class="max-w-xl mx-auto space-y-4" id="bookingForm">
+      <input type="text" name="name" placeholder="Full Name" class="w-full border p-3 rounded" required />
+      <input type="email" name="email" placeholder="Email Address" class="w-full border p-3 rounded" required />
+      <input type="date" name="date" class="w-full border p-3 rounded" required />
+      <select name="car" class="w-full border p-3 rounded" required>
+        <option>Select Car</option>
+        <option value="sedan">Sedan</option>
+        <option value="suv">SUV</option>
+        <option value="luxury">Luxury</option>
+      </select>
+      <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded hover:bg-blue-700">Book Now</button>
+    </form>
+    <p id="bookingMessage" class="text-center mt-4 text-green-600 hidden">Booking submitted successfully!</p>
+  </section>
+
+  <!-- Admin Dashboard -->
+  <section id="dashboard" class="bg-gray-100 py-12 px-6">
+    <h3 class="text-3xl font-bold text-center mb-10">Admin Dashboard - Bookings</h3>
+    <div id="bookingsList" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Bookings will be loaded here -->
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-12 text-center bg-gray-200">
+    <h3 class="text-2xl font-bold mb-4">Contact Us</h3>
+    <p>Email: support@drivenow.com | Phone: +91-9876543210</p>
+  </section>
+
+  <footer class="text-center text-gray-600 py-4 bg-white shadow-inner">
+    &copy; 2025 DriveNow. All rights reserved.
+  </footer>
+
+  <script>
+    const form = document.getElementById('bookingForm');
+    const message = document.getElementById('bookingMessage');
+    const bookingsList = document.getElementById('bookingsList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      const response = await fetch('http://localhost:3000/api/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        form.reset();
+        message.classList.remove('hidden');
+        loadBookings();
+      } else {
+        alert('Booking failed. Please try again later.');
+      }
+    });
+
+    async function loadBookings() {
+      const res = await fetch('http://localhost:3000/api/bookings');
+      const bookings = await res.json();
+
+      bookingsList.innerHTML = bookings.map(b => `
+        <div class="bg-white p-4 rounded shadow">
+          <h4 class="text-xl font-semibold">${b.name}</h4>
+          <p>Email: ${b.email}</p>
+          <p>Car: ${b.car}</p>
+          <p>Date: ${b.date}</p>
+        </div>
+      `).join('');
+    }
+
+    loadBookings();
+  </script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</body>
+
+</html> 
