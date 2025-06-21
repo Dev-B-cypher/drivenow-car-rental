@@ -4,7 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
 const Razorpay = require('razorpay');
-const Booking = require('./models/Booking');
+const Booking = require('./models/booking');
 
 // Load environment variables
 dotenv.config();
