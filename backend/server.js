@@ -6,20 +6,20 @@ const nodemailer = require('nodemailer');
 const Razorpay = require('razorpay');
 const Booking = require('./models/booking');
 
-// Load environment variables
+
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
+
 mongoose.set('strictQuery', true);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// Nodemailer Setup (Gmail SMTP)
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -28,13 +28,13 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Razorpay Setup (Test/Live keys)
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-// Route: Create Booking + Email
+
 app.post('/api/book', async (req, res) => {
   try {
     const booking = new Booking(req.body);
@@ -54,7 +54,7 @@ app.post('/api/book', async (req, res) => {
   }
 });
 
-// Route: Get All Bookings
+
 app.get('/api/bookings', async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ date: -1 });
@@ -65,7 +65,6 @@ app.get('/api/bookings', async (req, res) => {
   }
 });
 
-// Route: Initiate Payment
 app.post('/api/payment', async (req, res) => {
   const { amount } = req.body;
 
