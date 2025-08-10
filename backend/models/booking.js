@@ -8,7 +8,7 @@ const bookingSchema = new mongoose.Schema({
   amount: Number,
   status: {
     type: String,
-    enum: ['pending', 'completed'], // ✅ enum must be inside an object with 'type'
+    enum: ['pending', 'completed'], 
     default: 'pending'
   }
 });
