@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 function payNow(order) {
   const options = {
-    key: 'YOUR_PUBLIC_KEY', // Replace with real one
+    key: 'YOUR_PUBLIC_KEY', 
     amount: order.amount,
     currency: order.currency,
     name: "DriveNow",
@@ -18,7 +18,7 @@ function payNow(order) {
 =======
 function payNow(order) {
   const options = {
-    key: 'YOUR_PUBLIC_KEY', // Replace with real one
+    key: 'YOUR_PUBLIC_KEY', 
     amount: order.amount,
     currency: order.currency,
     name: "DriveNow",
